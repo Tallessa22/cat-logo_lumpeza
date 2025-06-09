@@ -1,0 +1,137 @@
+<script>
+    const client = contentful.createClient({
+        space: contentfulConfig.spaceId,
+        accessToken: contentfulConfig.accessToken
+    });
+
+    let allProducts = [];
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await client.getEntries({ content_type: contentfulConfig.contentType });
+            allProducts = response.items.map(item => ({
+                id: item.sys.id,
+                title: item.fields.nome,
+                description: item.fields.descricao,
+                category: item.fields.categoria,
+                price: item.fields.preco,
+                images: item.fields.imagens?.map(img => img.fields.file.url) || [],
+                features: item.fields.caracteristicas || []
+            }));
+
+            renderProducts(allProducts);
+            renderCategoryFilters(allProducts);
+            setupSearch();
+            setupModal();
+
+            document.getElementById('loading-indicator').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+
+        } catch (error) {
+            console.error("Erro ao carregar produtos:", error);
+            document.getElementById('loading-indicator').innerText = "Erro ao carregar produtos.";
+        }
+    });
+
+    function renderProducts(products) {
+        const grid = document.getElementById('product-grid');
+        grid.innerHTML = '';
+
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                <img src="${product.images[0] || ''}" alt="${product.title}">
+                <div class="product-card-content">
+                    <h3>${product.title}</h3>
+                    <div class="category">${product.category}</div>
+                    <div class="price">R$ ${product.price.toFixed(2)}</div>
+                </div>
+            `;
+            card.addEventListener('click', () => openModal(product));
+            grid.appendChild(card);
+        });
+    }
+
+    function renderCategoryFilters(products) {
+        const filtersContainer = document.getElementById('category-filters');
+        const categories = [...new Set(products.map(p => p.category))];
+        filtersContainer.innerHTML = '';
+
+        const createBtn = (cat) => {
+            const btn = document.createElement('button');
+            btn.className = 'filter-btn';
+            btn.innerText = cat;
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const filtered = cat === 'Todos' ? allProducts : allProducts.filter(p => p.category === cat);
+                renderProducts(filtered);
+            });
+            return btn;
+        };
+
+        filtersContainer.appendChild(createBtn('Todos'));
+        categories.forEach(cat => filtersContainer.appendChild(createBtn(cat)));
+    }
+
+    function setupSearch() {
+        const searchInput = document.getElementById('search-input');
+        searchInput.addEventListener('input', () => {
+            const term = searchInput.value.toLowerCase();
+            const filtered = allProducts.filter(p => p.title.toLowerCase().includes(term));
+            renderProducts(filtered);
+        });
+    }
+
+    function setupModal() {
+        const modal = document.getElementById('product-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalTitle = document.getElementById('modal-title');
+        const modalDesc = document.getElementById('modal-description');
+        const modalPrice = document.getElementById('modal-price');
+        const modalFeatures = document.getElementById('modal-features');
+        const whatsappLink = document.getElementById('whatsapp-link');
+
+        let currentProduct = null;
+        let currentImageIndex = 0;
+
+        document.querySelector('.close-modal').addEventListener('click', () => {
+            modal.classList.remove('visible');
+        });
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (!currentProduct) return;
+            currentImageIndex = (currentImageIndex - 1 + currentProduct.images.length) % currentProduct.images.length;
+            modalImg.src = currentProduct.images[currentImageIndex];
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (!currentProduct) return;
+            currentImageIndex = (currentImageIndex + 1) % currentProduct.images.length;
+            modalImg.src = currentProduct.images[currentImageIndex];
+        });
+
+        window.openModal = function(product) {
+            currentProduct = product;
+            currentImageIndex = 0;
+
+            modalImg.src = product.images[0] || '';
+            modalTitle.textContent = product.title;
+            modalDesc.textContent = product.description;
+            modalPrice.textContent = `R$ ${product.price.toFixed(2)}`;
+
+            modalFeatures.innerHTML = '';
+            product.features.forEach(feat => {
+                const li = document.createElement('li');
+                li.textContent = feat;
+                modalFeatures.appendChild(li);
+            });
+
+            const whatsappMsg = config.messageTemplate.replace('{PRODUCT_NAME}', encodeURIComponent(product.title));
+            whatsappLink.href = `https://wa.me/${config.whatsappNumber}?text=${whatsappMsg}`;
+
+            modal.classList.add('visible');
+        };
+    }
+</script>
