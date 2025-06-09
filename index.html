@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Catálogo de Produtos</title>
+    <style>
+        /* --- ESTILOS GERAIS --- */
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --card-bg-color: #ffffff;
+            --text-color: #343a40;
+            --light-gray: #e9ecef;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- CABEÇALHO E FILTROS --- */
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+        }
+
+        .filters-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        #search-bar {
+            padding: 10px 15px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            width: 250px;
+            font-size: 16px;
+        }
+
+        .category-filter {
+            padding: 10px 20px;
+            border: 1px solid var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .category-filter:hover, .category-filter.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* --- GRADE DE PRODUTOS --- */
+        #product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .product-card-content {
+            padding: 15px;
+        }
+
+        .product-card-content h3 {
+            margin: 0 0 10px 0;
+        }
+
+        .product-card-content .price {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        /* --- JANELA MODAL (DETALHES DO PRODUTO) --- */
+        #modal-container {
+            display: none; /* Começa escondido */
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg-color);
+            margin: auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .modal-close {
+            color: #aaa;
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #modal-images {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        #modal-description {
+            margin-top: 15px;
+        }
+        
+        #modal-features {
+            list-style-type: '✓  ';
+            padding-left: 20px;
+            margin-top: 15px;
+        }
+
+        .whatsapp-button {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .whatsapp-button:hover {
+            background-color: #128C7E;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Nosso Catálogo Incrível</h1>
+            <p>Explore nossos produtos e encontre o que você precisa!</p>
+        </header>
+
+        <div class="filters-container">
+            <input type="text" id="search-bar" placeholder="🔎 Buscar por nome...">
+            <div id="category-buttons">
+                </div>
+        </div>
+
+        <div id="product-grid">
+            </div>
+    </div>
+
+    <div id="modal-container">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <img id="modal-image" src="" alt="Imagem do Produto">
+            <h2 id="modal-title"></h2>
+            <p id="modal-price" class="price"></p>
+            <p id="modal-description"></p>
+            <h3>Características:</h3>
+            <ul id="modal-features"></ul>
+            <a id="modal-whatsapp-button" class="whatsapp-button" href="#" target="_blank">
+                Tenho Interesse!
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ==================================================================
+        // PASSO 1: CONFIGURE SEU NÚMERO DE WHATSAPP AQUI
+        // Coloque o número com código do país e DDD, sem espaços ou símbolos.
+        // Exemplo: 5511999998888
+        // ==================================================================
+        const WHATSAPP_NUMBER = '5511912345678';
+
+
+        // ==================================================================
+        // PASSO 2: CADASTRE SEUS PRODUTOS AQUI
+        // Siga o modelo para adicionar, remover ou editar produtos.
+        // - id: um número único para cada produto.
+        // - name: Nome do produto.
+        // - category: Categoria (ex: "Eletrônicos", "Roupas").
+        // - price: Preço formatado como texto.
+        // - description: Descrição curta para o card.
+        // - fullDescription: Descrição longa para a janela de detalhes.
+        // - image: URL da imagem principal do produto.
+        // - features: Lista de características para a janela de detalhes.
+        // ==================================================================
+        const products = [
+            {
+                id: 1,
+                name: "Smartphone X-Pro",
+                category: "Eletrônicos",
+                price: "R$ 1.999,00",
+                description: "O mais novo smartphone com câmera tripla e 128GB.",
+                fullDescription: "Experimente o poder da tecnologia com o Smartphone X-Pro. Com uma tela Super AMOLED de 6.5 polegadas, processador octa-core e bateria de longa duração, ele é perfeito para o seu dia a dia.",
+                image: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=580",
+                features: ["Tela 6.5' Super AMOLED", "128GB de Armazenamento", "Câmera Tripla 48MP", "Bateria de 5000mAh"]
+            },
+            {
+                id: 2,
+                name: "Notebook UltraSlim",
+                category: "Eletrônicos",
+                price: "R$ 4.599,00",
+                description: "Leve e potente para trabalho e estudos.",
+                fullDescription: "O Notebook UltraSlim combina design elegante com performance de ponta. Equipado com processador Intel i7, 16GB de RAM e SSD de 512GB, ele oferece velocidade e portabilidade.",
+                image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1026",
+                features: ["Processador Intel i7", "16GB RAM DDR4", "SSD 512GB NVMe", "Tela Full HD 14'"]
+            },
+            {
+                id: 3,
+                name: "Jaqueta de Couro Clássica",
+                category: "Roupas",
+                price: "R$ 450,00",
+                description: "Estilo atemporal que nunca sai de moda.",
+                fullDescription: "Feita com couro sintético de alta qualidade, esta jaqueta oferece conforto e durabilidade. Possui forro interno e bolsos com zíper, ideal para compor looks modernos.",
+                image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?q=80&w=435",
+                features: ["Couro Sintético Premium", "Forro Interno Macio", "Bolsos com Zíper", "Design Clássico"]
+            },
+            {
+                id: 4,
+                name: "Vaso de Cerâmica Decorativo",
+                category: "Decoração",
+                price: "R$ 120,00",
+                description: "Um toque de elegância para o seu ambiente.",
+                fullDescription: "Vaso de cerâmica artesanal, pintado à mão. Seu design minimalista se adapta a qualquer estilo de decoração, trazendo sofisticação e charme para sua casa ou escritório.",
+                image: "https://images.unsplash.com/photo-1579943542344-9345e2154563?q=80&w=387",
+                features: ["Feito de Cerâmica", "Pintado à Mão", "Altura: 25cm", "Design Minimalista"]
+            }
+        ];
+
+
+        // --- O RESTANTE DO CÓDIGO CUIDA DA MÁGICA ---
+        
+        const productGrid = document.getElementById('product-grid');
+        const categoryButtonsContainer = document.getElementById('category-buttons');
+        const searchBar = document.getElementById('search-bar');
+        
+        const modalContainer = document.getElementById('modal-container');
+        const modalClose = document.querySelector('.modal-close');
+        
+        let currentCategory = 'Todos';
+
+        // Função para renderizar os produtos na tela
+        function renderProducts() {
+            productGrid.innerHTML = '';
+            
+            const searchTerm = searchBar.value.toLowerCase();
+
+            const filteredProducts = products.filter(product => {
+                const inCategory = currentCategory === 'Todos' || product.category === currentCategory;
+                const inSearch = product.name.toLowerCase().includes(searchTerm);
+                return inCategory && inSearch;
+            });
+
+            if (filteredProducts.length === 0) {
+                productGrid.innerHTML = '<p>Nenhum produto encontrado.</p>';
+                return;
+            }
+
+            filteredProducts.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.dataset.productId = product.id;
+                
+                card.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}">
+                    <div class="product-card-content">
+                        <h3>${product.name}</h3>
+                        <p>${product.description}</p>
+                        <div class="price">${product.price}</div>
+                    </div>
+                `;
+                card.addEventListener('click', () => showModal(product.id));
+                productGrid.appendChild(card);
+            });
+        }
+        
+        // Função para criar os botões de categoria
+        function createCategoryFilters() {
+            const categories = ['Todos', ...new Set(products.map(p => p.category))];
+            
+            categories.forEach(category => {
+                const button = document.createElement('button');
+                button.className = 'category-filter';
+                button.textContent = category;
+                if (category === 'Todos') {
+                    button.classList.add('active');
+                }
+                button.addEventListener('click', () => {
+                    document.querySelector('.category-filter.active').classList.remove('active');
+                    button.classList.add('active');
+                    currentCategory = category;
+                    renderProducts();
+                });
+                categoryButtonsContainer.appendChild(button);
+            });
+        }
+        
+        // Função para mostrar o modal com os detalhes do produto
+        function showModal(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            document.getElementById('modal-image').src = product.image;
+            document.getElementById('modal-title').textContent = product.name;
+            document.getElementById('modal-price').textContent = product.price;
+            document.getElementById('modal-description').textContent = product.fullDescription;
+            
+            const featuresList = document.getElementById('modal-features');
+            featuresList.innerHTML = '';
+            product.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.textContent = feature;
+                featuresList.appendChild(li);
+            });
+
+            const message = encodeURIComponent(`Olá! Tenho interesse no produto: *${product.name}*. Poderia me dar mais informações?`);
+            document.getElementById('modal-whatsapp-button').href = `https://api.whatsapp.com/send?phone=${WHATSAPP_NUMBER}&text=${message}`;
+            
+            modalContainer.style.display = 'flex';
+        }
+
+        // Função para fechar o modal
+        function hideModal() {
+            modalContainer.style.display = 'none';
+        }
+        
+        // Adiciona os eventos
+        searchBar.addEventListener('input', renderProducts);
+        modalClose.addEventListener('click', hideModal);
+        modalContainer.addEventListener('click', (event) => {
+            if (event.target === modalContainer) {
+                hideModal();
+            }
+        });
+        
+        // Inicia a aplicação
+        createCategoryFilters();
+        renderProducts();
+    });
+    </script>
+
+</body>
+</html>
