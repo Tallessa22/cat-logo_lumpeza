@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo de Produtos</title>
+    <script src="https://cdn.jsdelivr.net/npm/contentful@latest/dist/contentful.browser.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* O CSS permanece o mesmo */
+        :root {
+            --primary-color: #007BFF;
+            --secondary-color: #6c757d;
+            --background-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-color: #333;
+            --border-color: #dee2e6;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            width: 100%;
+        }
+        #loading-indicator {
+            text-align: center;
+            font-size: 1.2em;
+            padding: 50px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        header h1 {
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        #search-input {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 1em;
+            width: 100%;
+            max-width: 300px;
+            transition: box-shadow 0.2s;
+        }
+        #search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+        #category-filters {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 8px 18px;
+            border: 1px solid var(--border-color);
+            background-color: var(--surface-color);
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover {
+            background-color: #e9ecef;
+        }
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        #product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .product-card {
+            background-color: var(--surface-color);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+        .product-card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            background-color: #eee;
+        }
+        .product-card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .product-card-content h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.2em;
+        }
+        .product-card-content .category {
+            font-size: 0.8em;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        .product-card-content .price {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: auto;
+        }
+        #product-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        #product-modal.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: var(--surface-color);
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: 15px;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+            flex-direction: column;
+        }
+        .modal-gallery {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            background-color: #eee;
+        }
+        .modal-gallery img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            box-sizing: border-box;
+        }
+        .nav-btn {
+            background-color: rgba(0,0,0,0.4);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 40px;
+            text-align: center;
+        }
+        .modal-details {
+            padding: 30px;
+            overflow-y: auto;
+        }
+        .modal-details h2 {
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+            text-align: left;
+        }
+        .modal-details p {
+            line-height: 1.6;
+        }
+        .modal-details ul {
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        .whatsapp-btn {
+            display: inline-block;
+            background-color: #25D366;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 700;
+            text-align: center;
+            transition: background-color 0.2s;
+        }
+        .whatsapp-btn:hover {
+            background-color: #1EBE57;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.3);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        @media (min-width: 900px) {
+            .modal-content {
+                flex-direction: row;
+            }
+            .modal-gallery {
+                width: 50%;
+                height: auto;
+            }
+            .modal-details {
+                width: 50%;
+            }
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            #search-input {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="app-container" style="display: none;">
+        <header>
+            <h1>Nosso Catálogo de Produtos</h1>
+            <p>Explore nossa seleção de produtos de qualidade</p>
+        </header>
+
+        <div class="controls">
+            <input type="text" id="search-input" placeholder="🔍 Buscar por nome...">
+            <div id="category-filters"></div>
+        </div>
+
+        <div id="product-grid"></div>
+    </div>
+
+    <div id="loading-indicator">
+        <p>Carregando produtos...</p>
+    </div>
+
+    <div id="product-modal">
+        <div class="modal-content">
+            <button class="close-modal" aria-label="Fechar">&times;</button>
+            <div class="modal-gallery">
+                <img id="modal-img" src="" alt="Imagem do Produto">
+                <div class="gallery-nav">
+                    <button id="prev-btn" class="nav-btn">&lt;</button>
+                    <button id="next-btn" class="nav-btn">&gt;</button>
+                </div>
+            </div>
+            <div class="modal-details">
+                <h2 id="modal-title"></h2>
+                <p id="modal-description"></p>
+                <h3>Características:</h3>
+                <ul id="modal-features"></ul>
+                <strong id="modal-price" style="font-size: 1.5em; color: var(--primary-color); display: block; margin-bottom: 20px;"></strong>
+                <a id="whatsapp-link" href="#" target="_blank" class="whatsapp-btn">
+                    Tenho Interesse (WhatsApp)
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURAÇÃO DA CONEXÃO COM O CONTENTFUL ---
+        const contentfulConfig = {
+            spaceId: '9ujsgy8e3bip',
+            accessToken: 'YKWRxsqnKRfD2nwFOpmzE6TG4CGLPk1OsBFFG0JZQ2o',
+            contentType: 'sabaoLquido'
+        };
+
+        const config = {
+            whatsappNumber: '5511943291778',
+            messageTemplate: 'Olá! Tenho interesse no produto: {PRODUCT_NAME}. Poderia me dar mais informações?'
+        };
+
+        // --- INICIALIZAÇÃO DA APLICAÇÃO ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const appContainer = document.getElementById('app-container');
+            
+            const client = contentful.createClient({
+                space: contentfulConfig.spaceId,
+                accessToken: contentfulConfig.accessToken,
+            });
+
+            try {
+                const entries = await client.getEntries({ content_type: contentfulConfig.contentType });
+                
+                // === AQUI ESTÁ A CORREÇÃO PRINCIPAL ===
+                // Mapeia os dados do Contentful usando os Field IDs EXATOS dos seus prints.
+                const products = entries.items.map(item => {
+                    const fields = item.fields;
+                    return {
+                        id: item.sys.id,
+                        nome: fields.sabaoLquido || 'Nome não definido',
+                        categoria: fields.categoria || 'Sem categoria',
+                        preco: fields.preo || 'Sob consulta',
+                        descricao: fields.descrio || 'Sem descrição.',
+                        estoque: fields.estoque || 0,
+                        imagens: fields.imagens ? fields.imagens.map(img => 'https:' + img.fields.file.url) : [],
+                        caracteristicas: fields.caracteristicas || []
+                    }
+                });
+
+                loadingIndicator.style.display = 'none';
+                appContainer.style.display = 'block';
+                
+                initializeApp(products);
+
+            } catch (error) {
+                console.error("Erro ao buscar produtos do Contentful:", error);
+                loadingIndicator.innerHTML = '<p>Ocorreu um erro ao carregar os produtos. Verifique se o API Identifier e os nomes dos campos estão corretos.</p>';
+            }
+        });
+
+        // --- FUNÇÃO PRINCIPAL DA APLICAÇÃO ---
+        function initializeApp(products) {
+            const productGrid = document.getElementById('product-grid');
+            const categoryFilters = document.getElementById('category-filters');
+            const searchInput = document.getElementById('search-input');
+            const modal = document.getElementById('product-modal');
+            
+            let currentImageIndex = 0;
+            let currentProductImages = [];
+
+            function renderProducts(productsToRender) {
+                productGrid.innerHTML = '';
+                if (productsToRender.length === 0) {
+                    productGrid.innerHTML = '<p>Nenhum produto encontrado com os critérios selecionados.</p>';
+                    return;
+                }
+                productsToRender.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+                    card.dataset.id = product.id;
+                    card.innerHTML = `
+                        <img src="${product.imagens[0] || 'https://via.placeholder.com/300x220.png?text=Sem+Imagem'}" alt="${product.nome}">
+                        <div class="product-card-content">
+                            <span class="category">${product.categoria}</span>
+                            <h3>${product.nome}</h3>
+                            <div class="price">${product.preco}</div>
+                        </div>
+                    `;
+                    productGrid.appendChild(card);
+                }
+            );
+            }
+
+            function renderCategories() {
+                const validCategories = products.map(p => p.categoria).filter(c => c && c !== 'Sem categoria');
+                const categories = ['Todos', ...new Set(validCategories)];
+                
+                categoryFilters.innerHTML = '';
+                categories.forEach(category => {
+                    const button = document.createElement('button');
+                    button.className = 'filter-btn';
+                    button.textContent = category;
+                    button.dataset.category = category;
+                    if (category === 'Todos') button.classList.add('active');
+                    categoryFilters.appendChild(button);
+                });
+            }
+
+            function openModal(productId) {
+                const product = products.find(p => p.id === productId);
+                if (!product) return;
+
+                document.getElementById('modal-title').textContent = product.nome;
+                document.getElementById('modal-description').textContent = product.descricao;
+                document.getElementById('modal-price').textContent = product.preco;
+                
+                const featuresList = document.getElementById('modal-features');
+                featuresList.innerHTML = '';
+                if(product.caracteristicas) {
+                    product.caracteristicas.forEach(feature => {
+                        featuresList.innerHTML += `<li>${feature}</li>`;
+                    });
+                }
+
+                currentProductImages = product.imagens.length > 0 ? product.imagens : ['https://via.placeholder.com/800x600.png?text=Sem+Imagem'];
+                currentImageIndex = 0;
+                updateModalImage();
+
+                const whatsappLink = document.getElementById('whatsapp-link');
+                const message = config.messageTemplate.replace('{PRODUCT_NAME}', encodeURIComponent(product.nome));
+                whatsappLink.href = `https://wa.me/${config.whatsappNumber}?text=${message}`;
+
+                modal.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('visible');
+                document.body.style.overflow = 'auto';
+            }
+
+            function updateModalImage() {
+                document.getElementById('modal-img').src = currentProductImages[currentImageIndex];
+            }
+            
+            function showNextImage() {
+                currentImageIndex = (currentImageIndex + 1) % currentProductImages.length;
+                updateModalImage();
+            }
+
+            function showPrevImage() {
+                currentImageIndex = (currentImageIndex - 1 + currentProductImages.length) % currentProductImages.length;
+                updateModalImage();
+            }
+
+            categoryFilters.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const selectedCategory = e.target.dataset.category;
+                    
+                    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+
+                    if (selectedCategory === 'Todos') {
+                        renderProducts(products);
+                    } else {
+                        const filtered = products.filter(p => p.categoria === selectedCategory);
+                        renderProducts(filtered);
+                    }
+                }
+            });
+
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                const filtered = products.filter(p => p.nome.toLowerCase().includes(searchTerm));
+                renderProducts(filtered);
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                const allButton = document.querySelector('.filter-btn[data-category="Todos"]');
+                if(allButton) allButton.classList.add('active');
+            });
+
+            productGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.product-card');
+                if (card) {
+                    const productId = card.dataset.id;
+                    openModal(productId);
+                }
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal || e.target.classList.contains('close-modal')) {
+                    closeModal();
+                }
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', showNextImage);
+            document.getElementById('prev-btn').addEventListener('click', showPrevImage);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('visible')) {
+                    closeModal();
+                }
+            });
+
+            renderCategories();
+            renderProducts(products);
+        }
+    </script>
+</body>
+</html>
