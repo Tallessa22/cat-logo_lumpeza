@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanPro - Catálogo de Produtos de Limpeza</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #2c3e50;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .product-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .product-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin-right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .product-description {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .product-features {
+            margin-bottom: 20px;
+        }
+
+        .features-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+        }
+
+        .feature-item::before {
+            content: "✓";
+            color: #27ae60;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .product-specs {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .spec-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .spec-value {
+            color: #666;
+        }
+
+        .price-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 10px;
+        }
+
+        .price {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .discount {
+            background: #e74c3c;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .buy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .contact-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .contact-title {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .contact-item {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .guarantee-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .product-card {
+            position: relative;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+
+        .category-section {
+            display: none;
+        }
+
+        .category-section.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧽 CleanPro</h1>
+            <p>Produtos de limpeza profissionais para sua casa e empresa. Qualidade garantida, preços imbatíveis e entrega rápida!</p>
+        </div>
+
+        <div class="navigation">
+            <button class="nav-btn active" onclick="showCategory('todos')">Todos os Produtos</button>
+            <button class="nav-btn" onclick="showCategory('multiuso')">Multiuso</button>
+            <button class="nav-btn" onclick="showCategory('banheiro')">Banheiro</button>
+            <button class="nav-btn" onclick="showCategory('cozinha')">Cozinha</button>
+            <button class="nav-btn" onclick="showCategory('pisos')">Pisos</button>
+        </div>
+
+        <div id="todos" class="category-section active">
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🧴</div>
+                        <div class="product-title">Limpador Multiuso Concentrado</div>
+                    </div>
+                    <div class="product-description">
+                        Fórmula concentrada que limpa, desengordurar e perfuma todos os tipos de superfície. Rendimento excepcional com economia garantida.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">Remove 99,9% das bactérias</div>
+                        <div class="feature-item">Biodegradável e ecológico</div>
+                        <div class="feature-item">Fragrância duradoura</div>
+                        <div class="feature-item">Não deixa resíduos</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Volume:</span>
+                            <span class="spec-value">500ml</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Rendimento:</span>
+                            <span class="spec-value">50 litros diluído</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">pH:</span>
+                            <span class="spec-value">7.0 (neutro)</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Validade:</span>
+                            <span class="spec-value">24 meses</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 24,90</div>
+                        <div class="discount">15% OFF</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🚿</div>
+                        <div class="product-title">Desincrustante para Banheiro</div>
+                    </div>
+                    <div class="product-description">
+                        Elimina incrustações, calcário, ferrugem e manchas difíceis. Ideal para box, azulejos, metais e louças sanitárias.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">Remove calcário e ferrugem</div>
+                        <div class="feature-item">Ação anti-fungos</div>
+                        <div class="feature-item">Não risca superfícies</div>
+                        <div class="feature-item">Fácil aplicação</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Volume:</span>
+                            <span class="spec-value">750ml</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Aplicação:</span>
+                            <span class="spec-value">Spray direto</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Tempo de ação:</span>
+                            <span class="spec-value">3-5 minutos</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Validade:</span>
+                            <span class="spec-value">18 meses</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 18,90</div>
+                        <div class="discount">20% OFF</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🍽️</div>
+                        <div class="product-title">Desengordurante para Cozinha</div>
+                    </div>
+                    <div class="product-description">
+                        Fórmula potente que remove gordura, óleo e resíduos alimentares. Perfeito para fogões, fornos, coifas e azulejos.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">Remove gordura pesada</div>
+                        <div class="feature-item">Seguro para alimentos</div>
+                        <div class="feature-item">Não agride as mãos</div>
+                        <div class="feature-item">Ação rápida</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Volume:</span>
+                            <span class="spec-value">650ml</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Concentração:</span>
+                            <span class="spec-value">Alta performance</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Aplicação:</span>
+                            <span class="spec-value">Spray + esponja</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Validade:</span>
+                            <span class="spec-value">24 meses</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 21,90</div>
+                        <div class="discount">10% OFF</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🏠</div>
+                        <div class="product-title">Cera Líquida para Pisos</div>
+                    </div>
+                    <div class="product-description">
+                        Protege, brilha e facilita a limpeza de pisos cerâmicos, porcelanatos e pedras naturais. Longa duração e resistência.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">Brilho intenso e duradouro</div>
+                        <div class="feature-item">Proteção anti-riscos</div>
+                        <div class="feature-item">Secagem rápida</div>
+                        <div class="feature-item">Não escorrega</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Volume:</span>
+                            <span class="spec-value">1 litro</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Rendimento:</span>
+                            <span class="spec-value">100m² por litro</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Secagem:</span>
+                            <span class="spec-value">15-20 minutos</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Validade:</span>
+                            <span class="spec-value">36 meses</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 32,90</div>
+                        <div class="discount">25% OFF</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🧽</div>
+                        <div class="product-title">Kit Esponjas Premium</div>
+                    </div>
+                    <div class="product-description">
+                        Kit com 6 esponjas de diferentes texturas e finalidades. Ideal para limpeza completa sem riscar superfícies delicadas.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">6 esponjas especializadas</div>
+                        <div class="feature-item">Não risca superfícies</div>
+                        <div class="feature-item">Alta durabilidade</div>
+                        <div class="feature-item">Secagem rápida</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Quantidade:</span>
+                            <span class="spec-value">6 unidades</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Tipos:</span>
+                            <span class="spec-value">Multiuso, inox, vidro</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Material:</span>
+                            <span class="spec-value">Fibra sintética</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Dimensões:</span>
+                            <span class="spec-value">11x7x3 cm cada</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 15,90</div>
+                        <div class="discount">30% OFF</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+
+                <div class="product-card">
+                    <div class="guarantee-badge">Garantia 30 dias</div>
+                    <div class="product-header">
+                        <div class="product-icon">🧴</div>
+                        <div class="product-title">Álcool Gel 70° Antisséptico</div>
+                    </div>
+                    <div class="product-description">
+                        Álcool gel 70° com ação antisséptica e hidratante. Elimina 99,9% dos germes e bactérias, protegendo sua família.
+                    </div>
+                    <div class="product-features">
+                        <div class="features-title">Características:</div>
+                        <div class="feature-item">70% álcool etílico</div>
+                        <div class="feature-item">Elimina vírus e bactérias</div>
+                        <div class="feature-item">Fórmula hidratante</div>
+                        <div class="feature-item">Secagem rápida</div>
+                    </div>
+                    <div class="product-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">Volume:</span>
+                            <span class="spec-value">500ml</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Concentração:</span>
+                            <span class="spec-value">70% álcool</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Registro:</span>
+                            <span class="spec-value">ANVISA aprovado</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Validade:</span>
+                            <span class="spec-value">24 meses</span>
+                        </div>
+                    </div>
+                    <div class="price-section">
+                        <div class="price">R$ 12,90</div>
+                        <div class="discount">Oferta!</div>
+                    </div>
+                    <button class="buy-btn">Comprar Agora</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="contact-section">
+            <h2 class="contact-title">💬 Entre em Contato</h2>
+            <p>Dúvidas? Pedidos especiais? Nossa equipe está pronta para atendê-lo!</p>
+            
+            <div class="contact-info">
+                <div class="contact-item">
+                    <div class="contact-icon">📱</div>
+                    <h3>WhatsApp</h3>
+                    <p><strong>(11) 99999-9999</strong></p>
+                    <p>Atendimento 8h às 18h</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">📧</div>
+                    <h3>E-mail</h3>
+                    <p><strong>vendas@cleanpro.com.br</strong></p>
+                    <p>Resposta em até 2h</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">🚚</div>
+                    <h3>Entrega</h3>
+                    <p><strong>Grátis acima de R$ 80</strong></p>
+                    <p>São Paulo e Grande SP</p>
+                </div>
+                
+                <div class="contact-item">
+                    <div class="contact-icon">💳</div>
+                    <h3>Pagamento</h3>
+                    <p><strong>Cartão, PIX, Boleto</strong></p>
+                    <p>Parcelamos em até 6x</p>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+                <h3>🎁 Promoções Especiais</h3>
+                <p><strong>Compre 3 produtos e ganhe 15% de desconto!</strong></p>
+                <p><strong>Frete grátis para pedidos acima de R$ 80</strong></p>
+                <p><strong>Garantia de 30 dias em todos os produtos</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showCategory(category) {
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Filter products based on category
+            const products = document.querySelectorAll('.product-card');
+            
+            if (category === 'todos') {
+                products.forEach(product => {
+                    product.style.display = 'block';
+                });
+            } else {
+                products.forEach(product => {
+                    const title = product.querySelector('.product-title').textContent.toLowerCase();
+                    
+                    let shouldShow = false;
+                    
+                    switch(category) {
+                        case 'multiuso':
+                            shouldShow = title.includes('multiuso') || title.includes('álcool');
+                            break;
+                        case 'banheiro':
+                            shouldShow = title.includes('banheiro') || title.includes('desincrustante');
+                            break;
+                        case 'cozinha':
+                            shouldShow = title.includes('cozinha') || title.includes('desengordurante');
+                            break;
+                        case 'pisos':
+                            shouldShow = title.includes('piso') || title.includes('cera');
+                            break;
+                    }
+                    
+                    product.style.display = shouldShow ? 'block' : 'none';
+                });
+            }
+        }
+
+        // Add click event to buy buttons
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const productName = this.closest('.product-card').querySelector('.product-title').textContent;
+                const price = this.closest('.product-card').querySelector('.price').textContent;
+                
+                alert(`Produto: ${productName}\nPreço: ${price}\n\nEntre em contato pelo WhatsApp (11) 99999-9999 para finalizar sua compra!`);
+            });
+        });
+
+        // Add smooth scroll animation
+        document.querySelectorAll('.product-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
